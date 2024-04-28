@@ -1,0 +1,29 @@
+DELIMITER $$
+
+CREATE PROCEDURE biblioteca()
+BEGIN
+    -- Insertar datos en la tabla de libros
+    INSERT INTO LLIBRES (TITOL, NUMEDICIO, LLOCEDICIO, ANYEDICIO, DESCRIP_LLIB, DEPI_LEGAL, SIGNTOP, DATBAIXA, MOTIUBAXA, ID_COLLECCIO, ID_DEPARTAMENT, ID_EDIT, ID_LLENGUA, IMG_LLIB)
+    VALUES ('El Principito', 1, 'París', 1943, 'Obra clásica de Antoine de Saint-Exupéry', 'DL-1234', 'ST-5678', '2024-04-28', 'Fin de la promoción', 1, 2, 3, 1, 'URL de la Imagen');
+
+    -- Insertar datos en la tabla de autores
+    INSERT INTO AUTORS (NOM_AUT, DNIAUT, NACIONALITAT, IMG_AUT)
+    VALUES ('Antoine de Saint-Exupéry', '12345678A', 'Francés', 'URL de la Imagen del Autor');
+    
+    DECLARE ID_LLIB INT; 
+    DECLARE ID_AUT INT;
+    
+    SELECT ID_LLIB = ID_LLIB FROM LLIBRES WHERE TITOL = 'El Principito';
+    SELECT ID_AUT = ID_AUT FROM AUTORS WHERE NOM_AUT = 'Antoine de Saint-Exupéry';
+
+    INSERT INTO LLI_AUT (ID_LLIB, ID_AUT, ROLAUT)
+    VALUES (ID_LLIB, ID_AUT, 'Escritor');
+    
+END;
+
+DELIMITER ;
+
+CALL biblioteca('E');
+
+ SELECT * FROM LLIBRES WHERE TITOL = 'El Principito';
+    SELECT * FROM AUTORS WHERE NOM_AUT = 'Antoine de Saint-Exupéry';  
