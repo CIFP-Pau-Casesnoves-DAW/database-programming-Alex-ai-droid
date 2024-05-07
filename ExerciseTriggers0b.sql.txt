@@ -1,0 +1,81 @@
+DELIMITER $$
+CREATE OR REPLACE TRIGGER logUpdatePis BEFORE UPDATE ON pis FOR EACH ROW
+BEGIN
+    INSERT INTO log (data, usuari, descripcio)
+    VALUES (CURRENT_TIMESTAMP, USER(), CONCAT('Se ha actualizado el piso con código ', OLD.pk_pis, ' y nombre "', OLD.descpis, '"'));
+END$$
+DELIMITER ;
+
+
+
+
+DELIMITER $$
+CREATE OR REPLACE TRIGGER logDeletePis BEFORE DELETE ON pis FOR EACH ROW
+BEGIN
+    INSERT INTO log (data, usuari, descripcio)
+    VALUES (CURRENT_TIMESTAMP, USER(), CONCAT('Se ha eliminado el piso con código ', OLD.pk_pis, ' y nombre "', OLD.descpis, '"'));
+END$$
+DELIMITER ;
+
+
+
+DELIMITER $$
+CREATE OR REPLACE TRIGGER loginInsertPis BEFORE INSERT ON pis FOR EACH ROW
+BEGIN
+    INSERT INTO log (data, usuari, descripcio)
+    VALUES (CURRENT_TIMESTAMP, USER(), CONCAT('Insertado el piso con código ', NEW.pk_pis, ' y nombre "', NEW.descpis, '"'));
+END$$
+DELIMITER ;
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+
+2--
+
+DELIMITER $$
+CREATE OR REPLACE TRIGGER controlAulasMax50
+BEFORE INSERT ON aula
+FOR EACH ROW
+BEGIN
+    DECLARE descaula INT;
+    
+    -- Obtenemos el número total de aulas en la tabla
+    SELECT COUNT(*) INTO descaula FROM aula;
+    
+    -- Si agregar una nueva aula supera 50, lanzamos un error
+    IF descaula + 1 > 50 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error: El número total de aulas no puede superar 50';
+    END IF;
+END$$
+DELIMITER ;
+--------------------------------------------------------------------------------------------------------------
+3--
+
+DELIMITER $$
+CREATE OR REPLACE TRIGGER insertAula AFTER INSERT ON aula
+FOR EACH ROW
+BEGIN
+    UPDATE pis SET capacitatPis = capacitatPis + NEW.capacitatAula
+    WHERE pk_pis = NEW.pk_fk_pis;
+END$$
+DELIMITER ;
+
+---------------------------------------------------------------------------------------------------------------
+
+DELIMITER $$
+CREATE OR REPLACE TRIGGER insertPis AFTER INSERT ON pis
+FOR EACH ROW
+BEGIN
+    UPDATE aula SET capacitatAula = NEW.capacitatPis
+    WHERE pk_fk_pis = NEW.pk_pis;
+END$$
+DELIMITER ;
+
+
+
+
+
+
+
+
+
