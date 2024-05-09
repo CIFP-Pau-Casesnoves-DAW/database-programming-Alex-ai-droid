@@ -1,0 +1,69 @@
+ALTER TABLE copy
+ADD COLUMN DEAD_DATE datetime NULL,
+ADD COLUMN DEAD_REASON char(100) NULL;
+
+
+
+ALTER TABLE book
+ADD COLUMN DEAD_DATE datetime NULL,
+ADD COLUMN DEAD_REASON char(100) NULL;
+
+
+
+
+
+
+
+
+
+DELIMITER //
+CREATE PROCEDURE Bajascopy(
+    IN p_book_code CHAR(4),
+    IN p_copy_code INT,
+    OUT p_deleted BOOLEAN,
+    OUT p_remaining_copies INT
+)
+BEGIN
+    DECLARE v_copy_count INT;
+
+  
+    SELECT COUNT(*) INTO v_copy_count
+    FROM copy
+    WHERE BOOK_CODE = p_book_code
+      AND COPY_CODE = p_copy_code
+      AND DEAD_DATE IS NULL;
+
+    IF v_copy_count = 1 THEN
+        UPDATE copy
+        SET DEAD_DATE = NOW(),
+            DEAD_REASON = 'Baja de ejemplar'
+        WHERE BOOK_CODE = p_book_code
+          AND COPY_CODE = p_copy_code;
+
+        SET p_deleted = TRUE;
+
+   
+        SELECT COUNT(*) INTO p_remaining_copies
+        FROM copy
+        WHERE BOOK_CODE = p_book_code
+          AND DEAD_DATE IS NULL;
+
+     
+        IF p_remaining_copies = 0 THEN
+            UPDATE book
+            SET DEAD_DATE = NOW(),
+                DEAD_REASON = 'Todos los ejemplares dados de baja'
+            WHERE BOOK_CODE = p_book_code;
+        END IF;
+    ELSE
+
+        SET p_deleted = FALSE;
+
+     
+        SELECT COUNT(*) INTO p_remaining_copies
+        FROM copy
+        WHERE BOOK_CODE = p_book_code
+          AND DEAD_DATE IS NULL;
+    END IF;
+END //
+DELIMITER ;
