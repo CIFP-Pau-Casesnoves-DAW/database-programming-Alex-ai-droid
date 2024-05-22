@@ -1,3 +1,5 @@
+SET GLOBAL event_scheduler = ON;
+
 CREATE EVENT deleterecerques
 
 ON SCHEDULE EVERY 1 DAY
